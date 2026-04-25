@@ -6,16 +6,16 @@
 #include <sstream>
 
 #define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCALL(y) GLClearError();\
-    y;\
-    ASSERT(GLLogCall())
+#define GLCALL(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x,__FILE__,__LINE__))
 
 static void GLClearError() {
     while (glGetError() != GL_NO_ERROR);
 }
-static bool GLLogCall() {
+static bool GLLogCall(const char* function, const char* file, int line) {
     while (GLenum error = glGetError()) {
-		std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
+		std::cout << "[OpenGL Error] (" << error << "): " << function << " " << file << ":" << line << std::endl;
         return false;
     }
     return true;
@@ -136,20 +136,20 @@ int main(void)
 
 
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    GLCALL(glGenBuffers(1, &buffer));
+    GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
 
-	glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,sizeof(float)*2,0);
+	GLCALL(glEnableVertexAttribArray(0));
+    GLCALL(glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,sizeof(float)*2,0));
 
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), positions,GL_STATIC_DRAW);
+	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCALL(glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), positions,GL_STATIC_DRAW));
 
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    GLCALL(glGenBuffers(1, &ibo));
+    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
