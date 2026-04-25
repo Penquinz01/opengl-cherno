@@ -5,6 +5,22 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCALL(y) GLClearError();\
+    y;\
+    ASSERT(GLLogCall())
+
+static void GLClearError() {
+    while (glGetError() != GL_NO_ERROR);
+}
+static bool GLLogCall() {
+    while (GLenum error = glGetError()) {
+		std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSource {
 	std::string VertexSource;
 	std::string FragmentSource;
@@ -107,11 +123,17 @@ int main(void)
 
 	std::cout << "OpenGl Version :" << glGetString(GL_VERSION) << std::endl;
 
-    float positions[6] = {
+    float positions[] = {
         -0.5f,-0.5f,
-        0.0f,0.5f,
-        0.5f,-0.5f
+        0.5f,-0.5f,
+        0.5f,0.5f,
+        -0.5f,0.5f,
     };
+    unsigned int indices[] = {
+        0,1,2,
+        2,3,0
+    };
+
 
     unsigned int buffer;
     glGenBuffers(1, &buffer);
@@ -120,7 +142,14 @@ int main(void)
 	glEnableVertexAttribArray(0);
     glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,sizeof(float)*2,0);
 
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions,GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), positions,GL_STATIC_DRAW);
+
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
@@ -132,7 +161,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+        GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

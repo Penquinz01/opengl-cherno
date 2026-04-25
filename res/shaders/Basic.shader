@@ -15,5 +15,5 @@ in vec4 uv_color;
 layout(location = 0) out vec4 color;
 
 void main(){
-	color = uv_color;
+	color = uv_color + vec4(0.5f, 0.5f, 0.5f, 0.0f);
 };
