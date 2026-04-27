@@ -2,7 +2,7 @@
 #version 430 core
 
 layout(location = 0) in vec4 position;
-out vec4 uv_color;
+
 
 void main(){
 	gl_Position = position;
@@ -11,9 +11,10 @@ void main(){
 
 #shader fragment
 #version 430 core
-in vec4 uv_color;
 layout(location = 0) out vec4 color;
 
+uniform vec4 u_Color;
+
 void main(){
-	color = uv_color + vec4(0.5f, 0.5f, 0.5f, 0.0f);
+	color = u_Color;
 };

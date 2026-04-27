@@ -117,6 +117,9 @@ int main(void)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+
+	glfwSwapInterval(1);
+
     if (glewInit() != GLEW_OK) {
         std::cout << "Failed to initialize GLEW" << std::endl;
     }
@@ -148,20 +151,36 @@ int main(void)
     unsigned int ibo;
     GLCALL(glGenBuffers(1, &ibo));
     GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
     GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
     unsigned int shader = CreateShader(source.VertexSource,source.FragmentSource);
 	glUseProgram(shader);
+
+	GLCALL(int location = glGetUniformLocation(shader, "u_Color"));
+	ASSERT(location != -1);
+    
+    float r = 0.0f;
+    float increment = 0.05f;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        GLCALL(glUniform4f(location, r, 0.3f, 0.5f, 0.8f));
         GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+	    
+        if (r > 1.0f) {
+            increment = -0.05f;
+        }
+        else if (r < 0.0f) {
+            increment = 0.05f;
+		}
+
+		r += increment;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
